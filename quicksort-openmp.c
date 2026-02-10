@@ -93,6 +93,9 @@ int main(int argc, char *argv[]) {
 
     double end_time = omp_get_wtime();
 
+    for(int loop = 0; loop < 10; loop++)
+      printf("%d ", array[loop]);
+    printf("\n");
     printf("Execution time: %g sec\n", end_time - start_time);
 
     free(array);
