@@ -27,6 +27,7 @@ sem_t turnstile;    // fairness control
 void* man_thread(void* arg)
 {
     int id = *((int*)arg);
+    srand(time(NULL) + id);
 
     while (1)
     {
@@ -36,20 +37,29 @@ void* man_thread(void* arg)
         printf("Man %d wants to enter\n", id);
 
         /* ===== ENTRY SECTION ===== */
+        sem_wait(&turnstile); //fairness
         sem_wait(&mutex);
-            men_count++;
-            if (men_count == 1)
-                sem_wait(&bathroom);
+        men_count++;
+        if (men_count == 1){
+            sem_post(&mutex);       // release mutex BEFORE waiting for bathroom
+            sem_wait(&bathroom);    // wait bathroom without holding mutex
+            sem_wait(&mutex);       // re-acquire to continue
+        }
         sem_post(&mutex);
+        sem_post(&turnstile);
 
         printf("Man %d enters bathroom\n", id);
+        printf("\n");
         printf("DEBUG: men_count=%d women_count=%d\n", men_count, women_count);
+        printf("\n");
 
 
         /* Simulate using bathroom */
         sleep(rand() % 2 + 1);
 
+        printf("\n");
         printf("DEBUG: men_count=%d women_count=%d\n", men_count, women_count);
+        printf("\n");
         printf("Man %d leaving bathroom\n", id);
 
         /* ===== EXIT SECTION ===== */
@@ -66,6 +76,7 @@ void* man_thread(void* arg)
 void* woman_thread(void* arg)
 {
     int id = *((int*)arg);
+    srand(time(NULL) + id);
 
     while (1)
     {
@@ -74,18 +85,27 @@ void* woman_thread(void* arg)
         printf("Woman %d wants to enter\n", id);
 
         /* ===== ENTRY SECTION ===== */
+        sem_wait(&turnstile); //fairness
         sem_wait(&mutex);
-            women_count++;
-            if (women_count == 1)
-                sem_wait(&bathroom);
+        women_count++;
+        if (women_count == 1){
+            sem_post(&mutex);       // release mutex BEFORE waiting for bathroom
+            sem_wait(&bathroom);    // wait bathroom without holding mutex
+            sem_wait(&mutex);       // re-acquire to continue
+        }
         sem_post(&mutex);
+        sem_post(&turnstile);
 
         printf("Woman %d enters bathroom\n", id);
+        printf("\n");
         printf("DEBUG: men_count=%d women_count=%d\n", men_count, women_count);
+        printf("\n");
 
         sleep(rand() % 2 + 1);
 
+        printf("\n");
         printf("DEBUG: men_count=%d women_count=%d\n", men_count, women_count);
+        printf("\n");
         printf("Woman %d leaving bathroom\n", id);
 
         /* ===== EXIT SECTION ===== */
