@@ -46,8 +46,6 @@ class Bathroom {
             turn = 1;
             notifyAll();
         }
-        
-    
     }
 
     public synchronized void womanEnter(){
