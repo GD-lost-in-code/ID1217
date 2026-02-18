@@ -1,10 +1,18 @@
 import java.util.Random;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
-enum Turn {
-    MEN,
-    WOMEN
+
+class LogUtil {
+    private static final DateTimeFormatter TIME_FMT =
+            DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
+
+    public static void log(String message) {
+        String time = LocalTime.now().format(TIME_FMT);
+        System.out.println(time + " | " + message);
+    }
 }
-// 
+
 class Bathroom {
     // shared variables/resources between threads need to be protected
     protected int menInside = 0;
@@ -16,6 +24,8 @@ class Bathroom {
     protected int waitingWomen = 0;
 
     protected int turn; // 1 for W, 0 for M
+
+    
 
     public synchronized void manEnter(){
         waitingMen++;
@@ -44,7 +54,6 @@ class Bathroom {
         waitingWomen++;
         while (menInside > 0 || (turn == 0 && waitingMen>0)){
             try {
-                waitingWomen++;
                 wait();
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt(); 
@@ -67,6 +76,7 @@ class Man extends Thread {
     private final int id;
     private final Bathroom bathroom;
     private final Random rand = new Random();
+    
 
     public Man(int id, Bathroom bathroom) {
         this.id = id;
@@ -80,15 +90,15 @@ class Man extends Thread {
                 Thread.sleep(rand.nextInt(3000) + 1000);
 
                 // Step 2: request entry
-                System.out.println("Man " + id + " wants to enter");
+                LogUtil.log("Man " + id + " wants to enter");
                 bathroom.manEnter();
-                System.out.println("Man " + id + " enters bathroom");
+                LogUtil.log("Man " + id + " enters bathroom");
 
                 // Step 3: use bathroom
                 Thread.sleep(rand.nextInt(2000) + 500);
 
                 // Step 4: exit
-                System.out.println("Man " + id + " leaving bathroom");
+                LogUtil.log("Man " + id + " leaving bathroom");
                 bathroom.manExit();
 
             } catch (InterruptedException e) {
@@ -108,19 +118,19 @@ class Woman extends Thread {
         this.id = id;
         this.bathroom = bathroom;
     }
-
+    
     public void run() {
         while (true) {
             try {
                 Thread.sleep(rand.nextInt(3000) + 1000);
 
-                System.out.println("Woman " + id + " wants to enter");
+                LogUtil.log("Woman " + id + " wants to enter");
                 bathroom.womanEnter();
-                System.out.println("Woman " + id + " enters bathroom");
+                LogUtil.log("Woman " + id + " enters bathroom");
 
                 Thread.sleep(rand.nextInt(2000) + 500);
 
-                System.out.println("Woman " + id + " leaving bathroom");
+                LogUtil.log("Woman " + id + " leaving bathroom");
                 bathroom.womanExit();
 
             } catch (InterruptedException e) {
