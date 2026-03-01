@@ -49,7 +49,8 @@ int main(int argc, char *argv[]) {
 
             // Send partner info back
             MPI_Send(&s2, 1, MPI_INT, s1, 1, MPI_COMM_WORLD);
-            MPI_Send(&s1, 1, MPI_INT, s2, 1, MPI_COMM_WORLD);
+            if (s1 != s2)
+                MPI_Send(&s1, 1, MPI_INT, s2, 1, MPI_COMM_WORLD);
         }
 
     } else {
@@ -63,7 +64,6 @@ int main(int argc, char *argv[]) {
         // Receive partner from teacher
         MPI_Recv(&partner, 1, MPI_INT, 0, 1, MPI_COMM_WORLD,
                  MPI_STATUS_IGNORE);
-
         printf("Student %d partnered with %d\n", rank, partner);
     }
 
